@@ -43,7 +43,7 @@ def render_hist(name, ori_data, bins=200):
     plt.ylabel('频次')
     plt.text(0, 0, str, fontsize=12, color='red', fontweight='bold')
     # 显示图形
-    plt.show()
+    # plt.show()
     print("================================")
     print("\n")
 
@@ -65,6 +65,70 @@ def duplicate_first_element(s):
     new_index.pop(-1)  # 去掉新索引列表的最后一个元素，对应去掉原Series的最后一个元素
     new_s = pd.Series(s.values, index=new_index)  # 根据调整后的索引重新构建Series
     return new_s
+
+# 开盘,收盘,最高,最低,成交量,成交额,振幅,涨跌幅,涨跌额,换手率
+def get_calc_day_up_down_data(file, col_name='涨跌额'):
+    data = pd.read_csv(file)
+    data_updown_rate_ori = data[col_name]
+    data_updown_rate = copy.deepcopy(data_updown_rate_ori)
+    for i in range(len(data_updown_rate)):
+        data_updown_rate[i] = data_updown_rate_ori[i]
+    return data_updown_rate
+
+
+def get_calc_day_max_down_data(file, col_name_down='最低', col_name='收盘'):
+    data = pd.read_csv(file)
+    data_down_ori = data[col_name_down]
+    data_end_ori = data[col_name]
+    data_updown_rate = copy.deepcopy(data_end_ori)
+    data_updown_rate = duplicate_first_element(data_updown_rate)
+    for i in range(len(data_updown_rate)):
+        data_updown_rate[i] = (data_down_ori[i] - data_end_ori[i])
+    return data_updown_rate
+
+
+def get_calc_day_max_up_down_data(file, col_name_down='最低', col_name_up='最高',
+                                       col_name='收盘'):
+    data = pd.read_csv(file)
+    data_down_ori = data[col_name_down]
+    data_up_ori = data[col_name_up]
+    data_end_ori = data[col_name]
+    data_updown_rate = copy.deepcopy(data_end_ori)
+    data_updown_rate = duplicate_first_element(data_updown_rate)
+    for i in range(len(data_updown_rate)):
+        data_updown_rate[i] = (data_up_ori[i] - data_down_ori[i])
+    return data_updown_rate
+
+
+def get_calc_day_max_up_data(file, col_name_up='最高', col_name='收盘'):
+    data = pd.read_csv(file)
+    data_up_ori = data[col_name_up]
+    data_end_ori = data[col_name]
+    data_updown_rate = copy.deepcopy(data_end_ori)
+    data_updown_rate = duplicate_first_element(data_updown_rate)
+    for i in range(len(data_updown_rate)):
+        data_updown_rate[i] = (data_up_ori[i] - data_end_ori[i])
+    return data_updown_rate
+
+
+def get_calc_day_open_max_down_data(file, col_name_down='最低', col_name='开盘'):
+    data = pd.read_csv(file)
+    data_down_ori = data[col_name_down]
+    data_end_ori = data[col_name]
+    data_updown_rate = copy.deepcopy(data_end_ori)
+    for i in range(len(data_updown_rate)):
+        data_updown_rate[i] = (data_down_ori[i] - data_end_ori[i])
+    return data_updown_rate
+
+
+def get_calc_day_open_max_up_data(file, col_name_up='最高', col_name='开盘'):
+    data = pd.read_csv(file)
+    data_up_ori = data[col_name_up]
+    data_end_ori = data[col_name]
+    data_updown_rate = copy.deepcopy(data_end_ori)
+    for i in range(len(data_updown_rate)):
+        data_updown_rate[i] = (data_up_ori[i] - data_end_ori[i])
+    return data_updown_rate
 
 
 # 开盘,收盘,最高,最低,成交量,成交额,振幅,涨跌幅,涨跌额,换手率
@@ -133,15 +197,28 @@ def get_calc_day_open_max_up_rate_data(file, col_name_up='最高', col_name='开
 
 
 def render_file(title, file):
-    render_hist(title + '-日内涨跌幅', get_calc_day_up_down_rate_data(file))
-    render_hist(title + '-日内波动幅度', get_calc_day_max_up_down_rate_data(file))
-    render_hist(title + '-日内低点跌幅', get_calc_day_max_down_rate_data(file))
-    render_hist(title + '-日内高点涨幅', get_calc_day_max_up_rate_data(file))
-    render_hist(title + '-相对开盘日内低点跌幅', get_calc_day_open_max_down_rate_data(file))
-    render_hist(title + '-相对开盘日内高点涨幅', get_calc_day_open_max_up_rate_data(file))
+    # render_hist(title + '-涨跌幅', get_calc_day_up_down_rate_data(file))
+    # render_hist(title + '-波动幅度', get_calc_day_max_up_down_rate_data(file))
+    # render_hist(title + '-低点跌幅', get_calc_day_max_down_rate_data(file))
+    # render_hist(title + '-高点涨幅', get_calc_day_max_up_rate_data(file))
+    # render_hist(title + '-相对开盘低点跌幅', get_calc_day_open_max_down_rate_data(file))
+    # render_hist(title + '-相对开盘高点涨幅', get_calc_day_open_max_up_rate_data(file))
+
+    render_hist(title + '-涨跌额', get_calc_day_up_down_data(file))
+    render_hist(title + '-波动额度', get_calc_day_max_up_down_data(file))
+    render_hist(title + '-低点额幅', get_calc_day_max_down_data(file))
+    render_hist(title + '-高点额幅', get_calc_day_max_up_data(file))
+    render_hist(title + '-相对开盘低点额幅', get_calc_day_open_max_down_data(file))
+    render_hist(title + '-相对开盘高点额幅', get_calc_day_open_max_up_data(file))
 
 
-render_file('IH50-15年至今', 'IH50.csv')
-render_file('IF300-15年至今', 'IF300.csv')
-render_file('IC500-15年至今', 'IC500.csv')
-render_file('IM1000-15年至今', 'IM1000.csv')
+# render_file('IH50-15年至今', 'IH50.csv')
+# render_file('IF300-15年至今', 'IF300.csv')
+# render_file('IC500-15年至今', 'IC500.csv')
+# render_file('IM1000-15年至今', 'IM1000.csv')
+
+render_file('IM1000-24-18-5分钟级别-至今', 'IM1000-5.csv')
+render_file('IM1000-24-18-15分钟级别-至今', 'IM1000-15.csv')
+render_file('IM1000-24-18-30分钟级别-至今', 'IM1000-30.csv')
+render_file('IM1000-24-18-60分钟级别-至今', 'IM1000-60.csv')
+
